@@ -1,0 +1,130 @@
+{
+  "mingtang": [
+    {
+      "file": "mingtang_1.jpg",
+      "src_n": 1,
+      "ratio": 0.67
+    },
+    {
+      "file": "mingtang_2.jpg",
+      "src_n": 5,
+      "ratio": 0.66444
+    },
+    {
+      "file": "mingtang_3.jpg",
+      "src_n": 23,
+      "ratio": 0.66444
+    },
+    {
+      "file": "mingtang_4.jpg",
+      "src_n": 40,
+      "ratio": 0.66444
+    },
+    {
+      "file": "mingtang_5.jpg",
+      "src_n": 43,
+      "ratio": 0.66444
+    },
+    {
+      "file": "mingtang_6.jpg",
+      "src_n": 48,
+      "ratio": 0.66444
+    }
+  ],
+  "zhoujinye": [
+    {
+      "file": "zhoujinye_1.jpg",
+      "src_n": 67,
+      "ratio": 0.66444
+    },
+    {
+      "file": "zhoujinye_2.jpg",
+      "src_n": 127,
+      "ratio": 0.665
+    },
+    {
+      "file": "zhoujinye_3.jpg",
+      "src_n": 8,
+      "ratio": 0.66444
+    },
+    {
+      "file": "zhoujinye_4.jpg",
+      "src_n": 30,
+      "ratio": 0.66444
+    },
+    {
+      "file": "zhoujinye_5.jpg",
+      "src_n": 68,
+      "ratio": 0.66444
+    },
+    {
+      "file": "zhoujinye_6.jpg",
+      "src_n": 71,
+      "ratio": 0.66444
+    }
+  ],
+  "couple": [
+    {
+      "file": "couple_1.jpg",
+      "src_n": 4,
+      "ratio": 0.66444
+    },
+    {
+      "file": "couple_2.jpg",
+      "src_n": 17,
+      "ratio": 0.66444
+    },
+    {
+      "file": "couple_3.jpg",
+      "src_n": 34,
+      "ratio": 0.66444
+    },
+    {
+      "file": "couple_4.jpg",
+      "src_n": 42,
+      "ratio": 0.66444
+    },
+    {
+      "file": "couple_5.jpg",
+      "src_n": 57,
+      "ratio": 0.66444
+    },
+    {
+      "file": "couple_6.jpg",
+      "src_n": 19,
+      "ratio": 0.66444
+    }
+  ],
+  "family": [
+    {
+      "file": "family_1.jpg",
+      "src_n": 49,
+      "ratio": 0.665
+    },
+    {
+      "file": "family_2.jpg",
+      "src_n": 51,
+      "ratio": 0.665
+    },
+    {
+      "file": "family_3.jpg",
+      "src_n": 110,
+      "ratio": 0.66444
+    },
+    {
+      "file": "family_4.jpg",
+      "src_n": 31,
+      "ratio": 0.665
+    },
+    {
+      "file": "family_5.jpg",
+      "src_n": 118,
+      "ratio": 0.66444
+    },
+    {
+      "file": "family_6.jpg",
+      "src_n": 88,
+      "ratio": 0.665
+    }
+  ]
+}

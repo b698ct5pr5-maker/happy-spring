@@ -1,165 +1,113 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <!--
-    视口策略（移动端友好）：
-    - width=device-width, initial-scale=1    按设备宽度、1:1 初始缩放
-    - viewport-fit=cover                     让 safe-area-inset 生效，规避刘海/手势条遮挡
-    - 不再写死 maximum-scale=1 / user-scalable=no：
-      iOS 10+ 本就忽略该设置，反而会让部分安卓浏览器禁用必要缩放；
-      游戏内已用 touch-action:none + 事件 preventDefault 阻止误缩放，无需此处硬禁。
-  -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#F5F7FA">
-  <meta name="description" content="春满里趣味游戏 · 拼出属于你的春满里记忆">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="format-detection" content="telephone=no">
-  <title>春满里趣味游戏</title>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      /* 100dvh：随手机地址栏收起/展开动态变化，避免底部被裁切 */
-      height: 100dvh;
-      overflow: hidden;
-      background: #F5F7FA;
-      overscroll-behavior: none;
-      -webkit-user-select: none; user-select: none;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    #game-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-
-    /* 启动/错误提示层：Canvas 是纯绘制，无 DOM，需一个可见反馈避免"白屏错觉" */
-    #boot {
-      position: fixed; inset: 0; z-index: 99;
-      display: flex; align-items: center; justify-content: center;
-      background: #F5F7FA; padding: 24px;
-      transition: opacity .35s ease;
-    }
-    #boot.hide { opacity: 0; pointer-events: none; }
-    .boot-box { text-align: center; max-width: 340px; width: 100%; }
-    .boot-logo {
-      width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 18px;
-      background: linear-gradient(135deg,#4B86FF,#2F6DF0);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 20px rgba(47,109,240,.28);
-    }
-    .boot-logo svg { width: 34px; height: 34px; }
-    .boot-title { font-size: 20px; font-weight: 800; color: #1A1D26; }
-    .boot-sub { margin-top: 10px; font-size: 13px; color: #8892A4; line-height: 1.7; }
-    .boot-spin {
-      width: 26px; height: 26px; margin: 20px auto 0;
-      border: 3px solid #DCE6FB; border-top-color: #2F6DF0; border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #bootBtn {
-      display: none; margin: 22px auto 0; padding: 12px 34px;
-      border: 0; border-radius: 24px; background: #2F6DF0; color: #fff;
-      font-size: 16px; font-weight: 700; cursor: pointer;
-    }
-    #bootBtn:active { transform: scale(.97); }
-    @media screen and (orientation: landscape) { html, body { background: #F5F7FA; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>春满里趣味游戏</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Eruda 移动端调试控制台：仅当链接带 debug=1 时异步加载，
-       避免普通玩家受外部 CDN 拖慢启动、也不显示调试按钮。
-       调试用法：在分享链接末尾追加 &debug=1 -->
-  <script>
-  (function () {
-    if (!/[?&]debug=1(&|$)/.test(location.search)) return;
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/eruda';
-    s.async = true;
-    s.onload = function () { if (window.eruda) window.eruda.init(); };
-    document.head.appendChild(s);
-  })();
-  </script>
+<main class="app">
+  <!-- 首页 -->
+  <section id="homeView" class="view active">
+    <header class="hero">
+      <h1 class="game-title">春满里趣味游戏</h1>
+      <div class="ribbon"><span>即可挑战唤醒你的春满里记忆</span></div>
+    </header>
 
-  <!-- 主画布：game.js 通过 wx.createCanvas() 取得并全屏绘制 -->
-  <canvas id="game-canvas"></canvas>
+    <div class="section-label">多种主题 任你选择</div>
 
-  <!-- 启动/错误反馈层（脚本加载失败时不再白屏） -->
-  <div id="boot">
-    <div class="boot-box">
-      <div class="boot-logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="8" height="8" rx="2" fill="#fff"/>
-          <rect x="13" y="3" width="8" height="8" rx="2" fill="#fff" opacity=".8"/>
-          <rect x="3" y="13" width="8" height="8" rx="2" fill="#fff" opacity=".8"/>
-          <rect x="13" y="13" width="8" height="8" rx="2" fill="#fff" opacity=".6"/>
-        </svg>
-      </div>
-      <div class="boot-title">春满里趣味游戏</div>
-      <div class="boot-sub" id="bootSub">正在加载，请稍候…</div>
-      <div class="boot-spin" id="bootSpin"></div>
-      <button id="bootBtn" type="button">重新加载</button>
+    <div class="category-grid" id="categoryGrid">
+      <button class="cat-card cat-mingtang" data-cat="mingtang">
+        <div class="cat-thumb"><img src="images/mingtang_1.jpg" alt=""></div>
+        <div class="cat-name">明棠</div>
+        <div class="cat-desc">明媚小太阳☀️</div>
+        <div class="cat-count">6 张</div>
+      </button>
+      <button class="cat-card cat-zhoujinye" data-cat="zhoujinye">
+        <div class="cat-thumb"><img src="images/zhoujinye_1.jpg" alt=""></div>
+        <div class="cat-name">周尽野</div>
+        <div class="cat-desc">可靠忠犬</div>
+        <div class="cat-count">6 张</div>
+      </button>
+      <button class="cat-card cat-couple" data-cat="couple">
+        <div class="cat-thumb"><img src="images/couple_1.jpg" alt=""></div>
+        <div class="cat-name">双人拼图</div>
+        <div class="cat-desc">明棠&周尽野</div>
+        <div class="cat-count">6 张</div>
+      </button>
+      <button class="cat-card cat-family" data-cat="family">
+        <div class="cat-thumb"><img src="images/family_4.jpg" alt=""></div>
+        <div class="cat-name">其他拼图</div>
+        <div class="cat-desc">奶奶的温馨日常</div>
+        <div class="cat-count">6 张</div>
+      </button>
     </div>
-  </div>
 
-  <script>
-  /* =======================================================================
-     启动引导（移动端健壮性核心）
-     分享平台对子资源请求依赖 cookie，但手机浏览器（微信内置 / 隐私模式 /
-     第三方 Cookie 受限）常丢失该 cookie，导致 wx-shim.js、game.js、图片
-     全部返回 403「链接不完整」HTML 错误页 → 白屏。
-     解决：从当前 URL 读取 sharecode，动态拼接到每个子资源 URL 上，
-     服务端按 URL 参数鉴权即可放行，彻底不依赖 cookie。
-     ======================================================================= */
-  (function () {
-    'use strict';
-    var m = location.search.match(/[?&]sharecode=([^&]+)/);
-    var code = m ? decodeURIComponent(m[1]) : '';
-    window.__SHARECODE__ = code;
-    window.__withCode = function (url) {
-      if (!code) return url;
-      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'sharecode=' + encodeURIComponent(code);
-    };
+    <button class="primary-btn" id="startBtn">立即拼图 <span>🧩</span></button>
+    <p class="hint-text">选择主题后点击「立即拼图」开始 · 也可直接点选卡片</p>
+  </section>
 
-    var boot   = document.getElementById('boot');
-    var sub    = document.getElementById('bootSub');
-    var spin   = document.getElementById('bootSpin');
-    var btn    = document.getElementById('bootBtn');
-    var failed = false;
+  <!-- 素材选择页（照片展示页） -->
+  <section id="selectView" class="view">
+    <div class="sub-header">
+      <button class="back-btn" data-back="homeView">‹ 返回</button>
+      <h2 id="selectTitle">选择图片</h2>
+      <span class="sub-badge">6 张可选</span>
+    </div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="select-grid" id="selectGrid"></div>
+    <button class="primary-btn sticky-btn" id="toPuzzleBtn">开始拼图 <span>🧩</span></button>
+  </section>
 
-    function fail(msg) {
-      failed = true;
-      if (spin) spin.style.display = 'none';
-      if (sub) sub.textContent = msg;
-      if (btn) btn.style.display = 'inline-block';
-    }
-    btn && btn.addEventListener('click', function () { location.reload(); });
+  <!-- 游戏页 -->
+  <section id="gameView" class="view">
+    <div class="sub-header">
+      <button class="back-btn" data-back="selectView">‹ 返回</button>
+      <h2>拼图进行中</h2>
+      <div class="game-stats"><span id="moveCount">0</span> 步</div>
+    </div>
 
-    // 顺序加载：适配层必须先于游戏逻辑；均带 sharecode 鉴权参数
-    function loadScript(src, done) {
-      var s = document.createElement('script');
-      s.src = window.__withCode(src);
-      s.onload = done;
-      s.onerror = function () { fail('资源加载失败，请检查网络后重新打开发布链接'); };
-      document.body.appendChild(s);
-    }
+    <div class="difficulty-row">
+      <span class="diff-label">难度：</span>
+      <div class="diff-tabs" id="diffTabs">
+        <button data-diff="3" class="active">简单 3×3</button>
+        <button data-diff="4">进阶 4×4</button>
+        <button data-diff="5">挑战 5×5</button>
+      </div>
+    </div>
 
-    loadScript('wx-shim.js', function () {
-      loadScript('game.js', function () {
-        // 等两帧确保首屏已绘制，再淡出引导层
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            boot.classList.add('hide');
-            setTimeout(function () { if (boot.parentNode) boot.remove(); }, 400);
-          });
-        });
-      });
-    });
+    <div class="board-area">
+      <div class="board-frame">
+        <div class="board" id="board"></div>
+        <div class="board-preview">
+          <span>参考图</span>
+          <img id="previewImg" src="" alt="参考图">
+        </div>
+      </div>
+      <div class="win-overlay" id="winOverlay">
+        <div class="win-card">
+          <div class="win-emoji">🎉</div>
+          <h3>拼图成功！</h3>
+          <p id="winMsg">太棒了，你完成了拼图</p>
+          <div class="win-btns">
+            <button id="nextPuzzleBtn">下一张</button>
+            <button id="replayBtn">再玩一次</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    // 12 秒兜底：仍未就绪则给出明确提示，避免无限白屏
-    setTimeout(function () {
-      if (!failed && !boot.classList.contains('hide')) fail('加载较慢，请稍候或点击重新加载');
-    }, 12000);
-  })();
-  </script>
+    <div class="game-controls">
+      <button class="ctrl-btn ctrl-ghost" id="shuffleBtn">🔀 打乱</button>
+      <button class="ctrl-btn ctrl-ghost" id="hintBtn">👁 看原图</button>
+      <button class="ctrl-btn ctrl-reset" id="resetBtn">↺ 重置</button>
+    </div>
+    <p class="hint-text game-tip">点击两块拼图即可交换位置，全部归位即完成</p>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="game.js"></script>
 </body>
 </html>
